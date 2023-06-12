@@ -6,7 +6,9 @@ import logging
 import math
 import time
 
+from nostr.event import EncryptedDirectMessage
 from nostr.filter import Filter, Filters
+from nostr.key import PrivateKey
 from nostr.message_type import ClientMessageType
 from nostr.relay_manager import RelayManager
 
@@ -28,15 +30,22 @@ logging.info("Starting")
 
 logging.debug(f"Config: {config}")
 
-filter = Filters([Filter(authors=[config["public_key"]], since=config["last_run"])])
-sub_id = "ilovenostr"
-request = [ClientMessageType.REQUEST, sub_id]
-request.extend(filter.to_json_array())
-
 relay_manager = RelayManager()
 
 for relay in config["relays"]:
     relay_manager.add_relay(relay)
+
+private_key = PrivateKey().from_nsec(config["private_key"])
+start_dm = EncryptedDirectMessage(
+    recipient_pubkey=config["public_key"], cleartext_content="Taking notes"
+)
+private_key.sign_event(start_dm)
+relay_manager.publish_event(start_dm)
+
+filter = Filters([Filter(authors=[config["public_key"]], since=config["last_run"])])
+sub_id = "ilovenostr"
+request = [ClientMessageType.REQUEST, sub_id]
+request.extend(filter.to_json_array())
 
 relay_manager.add_subscription(sub_id, filter)
 relay_manager.open_connections()
@@ -57,9 +66,7 @@ while relay_manager.message_pool.has_events():
     if current_event.verify():
         event_list.append(event_msg.event)
 
-logging.info("Events received, closing connections")
-relay_manager.close_connections()
-logging.info("Connections closed")
+logging.info("Events received")
 
 deduped_events = []
 
@@ -83,5 +90,16 @@ new_config = config
 new_config["last_run"] = last_run
 with open(args.config, "w") as f:
     json.dump(new_config, f, indent=4)
+
+end_dm = EncryptedDirectMessage(
+    recipient_pubkey=config["public_key"],
+    cleartext_content=f"Finished taking {len(stringified)} new notes",
+)
+private_key.sign_event(end_dm)
+relay_manager.publish_event(end_dm)
+
+logging.info("Closing connections")
+relay_manager.close_connections()
+logging.info("Connections closed")
 
 logging.info("Done")
