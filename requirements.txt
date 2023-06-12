@@ -1,1 +1,1 @@
-nostr
+git+https://github.com/callebtc/python-nostr
