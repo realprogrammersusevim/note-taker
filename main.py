@@ -35,12 +35,13 @@ relay_manager = RelayManager()
 for relay in config["relays"]:
     relay_manager.add_relay(relay)
 
-private_key = PrivateKey().from_nsec(config["private_key"])
-start_dm = EncryptedDirectMessage(
-    recipient_pubkey=config["public_key"], cleartext_content="Taking notes"
-)
-private_key.sign_event(start_dm)
-relay_manager.publish_event(start_dm)
+if config["should_dm"]:
+    private_key = PrivateKey().from_nsec(config["private_key"])
+    start_dm = EncryptedDirectMessage(
+        recipient_pubkey=config["public_key"], cleartext_content="Taking notes"
+    )
+    private_key.sign_event(start_dm)
+    relay_manager.publish_event(start_dm)
 
 filter = Filters([Filter(authors=[config["public_key"]], since=config["last_run"])])
 sub_id = "ilovenostr"
@@ -91,12 +92,13 @@ new_config["last_run"] = last_run
 with open(args.config, "w") as f:
     json.dump(new_config, f, indent=4)
 
-end_dm = EncryptedDirectMessage(
-    recipient_pubkey=config["public_key"],
-    cleartext_content=f"Finished taking {len(stringified)} new notes",
-)
-private_key.sign_event(end_dm)
-relay_manager.publish_event(end_dm)
+if config["should_dm"]:
+    end_dm = EncryptedDirectMessage(
+        recipient_pubkey=config["public_key"],
+        cleartext_content=f"Finished taking {len(stringified)} new notes",
+    )
+    private_key.sign_event(end_dm)
+    relay_manager.publish_event(end_dm)
 
 logging.info("Closing connections")
 relay_manager.close_connections()

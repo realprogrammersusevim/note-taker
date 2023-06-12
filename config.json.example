@@ -1,6 +1,7 @@
 {
-  "private_key": "this bot's private key",
-  "public_key": "your public key",
+  "should_dm": true
+  "private_key": "this bot's private key as a nsec",
+  "public_key": "your public key as a hex",
   "relays": [
     "a list",
     "of relays",
