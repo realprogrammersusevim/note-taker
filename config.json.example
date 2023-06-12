@@ -1,0 +1,13 @@
+{
+  "private_key": "this bot's private key",
+  "public_key": "your public key",
+  "relays": [
+    "a list",
+    "of relays",
+    "this bot",
+    "should search"
+  ],
+  "output": "the file events should be saved to",
+  "logging": "the file logs should be saved to",
+  "last_run": "this bot's last run time as a unix timestamp"
+}
