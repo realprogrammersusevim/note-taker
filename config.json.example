@@ -1,5 +1,5 @@
 {
-  "should_dm": true
+  "should_dm": true,
   "private_key": "this bot's private key as a nsec",
   "public_key": "your public key as a hex",
   "relays": [
@@ -10,5 +10,10 @@
   ],
   "output": "the file events should be saved to",
   "logging": "the file logs should be saved to",
-  "last_run": "this bot's last run time as a unix timestamp"
+  "last_run": "this bot's last run time as a unix timestamp",
+  "metadata": {
+    "name": "the name of the bot",
+    "about": "a description of the bot",
+    "picture": "a url to the bot's picture"
+  }
 }
