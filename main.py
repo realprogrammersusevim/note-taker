@@ -46,6 +46,8 @@ if args.metadata:
     metadata_event = Event(metadata, kind=EventKind.SET_METADATA)
     private_key.sign_event(metadata_event)
     logging.debug(f"Metadata event: {metadata_event.to_message()}")
+    relay_manager.open_connections()
+    time.sleep(2)
     relay_manager.publish_event(metadata_event)
     logging.info("Metadata published")
 else:
