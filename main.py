@@ -41,16 +41,20 @@ for relay in config["relays"]:
 private_key = PrivateKey().from_nsec(config["private_key"])
 
 if args.metadata:
+    # Send an event to update the bot's metadata to whatever is set in the config file
     metadata = json.dumps(config["metadata"])
+
     logging.debug(f"Metadata: {metadata}")
     metadata_event = Event(metadata, kind=EventKind.SET_METADATA)
     private_key.sign_event(metadata_event)
+
     logging.debug(f"Metadata event: {metadata_event.to_message()}")
     relay_manager.open_connections()
     time.sleep(2)
     relay_manager.publish_event(metadata_event)
     logging.info("Metadata published")
 else:
+    # Send a DM update to whoever is running the bot
     if config["should_dm"]:
         start_dm = EncryptedDirectMessage(
             recipient_pubkey=config["public_key"], cleartext_content="Taking notes"
@@ -58,6 +62,8 @@ else:
         private_key.sign_event(start_dm)
         relay_manager.publish_event(start_dm)
 
+    # Request all the notes from the pubkey we're taking notes on since we last ran the
+    # bot to make sure we only get new notes
     filter = Filters([Filter(authors=[config["public_key"]], since=config["last_run"])])
     sub_id = "ilovenostr"
     request = [ClientMessageType.REQUEST, sub_id]
@@ -68,6 +74,7 @@ else:
     time.sleep(1)
     logging.info("Connections open")
 
+    # Send a message to the relays requesting the notes
     message = json.dumps(request)
     relay_manager.publish_message(message)
     time.sleep(1)
@@ -75,6 +82,7 @@ else:
 
     event_list = []
 
+    # Store the received events in a list
     while relay_manager.message_pool.has_events():
         event_msg = relay_manager.message_pool.get_event()
         current_event = event_msg.event
@@ -84,6 +92,7 @@ else:
 
     logging.info("Events received")
 
+    # Remove the duplicates
     deduped_events = []
 
     for event in event_list:
@@ -97,9 +106,11 @@ else:
     logging.debug(f"New events: {stringified}")
     logging.info("Events deduped, writing to file")
 
+    # Now save those new events to a file
     with open(config["output"], "a") as f:
         f.write("\n".join(stringified))
 
+    # Update the last run for the next time the bot runs
     last_run = math.floor(time.time())
     logging.debug(f"New last run: {last_run}")
     new_config = config
@@ -107,6 +118,7 @@ else:
     with open(args.config, "w") as f:
         json.dump(new_config, f, indent=2)
 
+    # Tell the user we're all done
     if config["should_dm"]:
         end_dm = EncryptedDirectMessage(
             recipient_pubkey=config["public_key"],
@@ -115,6 +127,7 @@ else:
         private_key.sign_event(end_dm)
         relay_manager.publish_event(end_dm)
 
+# Shut everything down
 logging.info("Closing connections")
 relay_manager.close_connections()
 logging.info("Connections closed")
