@@ -15,16 +15,26 @@ from nostr.relay_manager import RelayManager
 parser = argparse.ArgumentParser(description="Note Taker")
 parser.add_argument("-c", "--config", help="Path to config file")
 parser.add_argument(
-    "-m", "--metadata", action="store_true", help="Publish metadata about the bot"
+    "-m",
+    "--metadata",
+    action="store_true",
+    help="Publish Nostr metadata event about the bot",
 )
+parser.add_argument("-q", "--quiet", action="store_true", help="Don't DM the user")
+parser.add_argument("-v", "--verbose", action="store_true", help="Verbose logging")
 args = parser.parse_args()
 
 config = json.load(open(args.config))
 
+if args.verbose:
+    level = logging.DEBUG
+else:
+    level = logging.INFO
+
 logging.basicConfig(
     format="[%(levelname)s] %(asctime)s - %(message)s",
     datefmt="%d-%b-%y %H:%M:%S",
-    level=logging.DEBUG,
+    level=level,
     filename=config["logging"],
     filemode="a",
 )
@@ -55,7 +65,7 @@ if args.metadata:
     logging.info("Metadata published")
 else:
     # Send a DM update to whoever is running the bot
-    if config["should_dm"]:
+    if not args.quiet:
         start_dm = EncryptedDirectMessage(
             recipient_pubkey=config["public_key"], cleartext_content="Taking notes"
         )
@@ -119,7 +129,7 @@ else:
         json.dump(new_config, f, indent=2)
 
     # Tell the user we're all done
-    if config["should_dm"]:
+    if not args.quiet:
         end_dm = EncryptedDirectMessage(
             recipient_pubkey=config["public_key"],
             cleartext_content=f"Finished taking {len(stringified)} new notes",
