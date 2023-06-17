@@ -1,19 +1,32 @@
 # Note Taker
 
-Information disappears over time. Note taker is a Python script to allow you to
-save your Nostr notes into a file so you can keep them forever even if relays
-delete them. This is the poor man's alternative to running your own relay.
+Information disappears over time. Note taker is a Python script that finds your
+Nostr notes on relays and saves them locally into a file so you can keep them
+forever even if relays delete them.
 
-## How to use
+## Installation
 
-The bot automatically keeps track of when it last ran and will only fetch notes
-since then. This makes it perfect for running as a cron job on your device.
-
-To run the bot, run
+Clone the repository onto your device.
 
 ```bash
+git clone https://github.com/realprogrammersusevim/note-taker
+cd note-taker
 pip install -r requirements.txt
+```
+
+## Usage
+
+Almost all the options are specified in the configuration file. Copy the example
+configuration file to a new location and edit the values.
+
+```bash
 cp config.json.example config.json
 ```
 
-and fill in the configuration values.
+Once you have your configuration written out you can run the script.
+
+```bash
+./main.py -c config.json
+```
+
+The other CLI options can be seen by running `./main.py --help`.
