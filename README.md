@@ -1,5 +1,8 @@
 # Note Taker
 
+[![GitHub license](https://img.shields.io/github/license/realprogrammersusevim/note-taker.svg?style=flat-square)](https://github.com/realprogrammersusevim/note-taker/blob/master/LICENSE)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-green.svg?style=flat-square)](http://makeapullrequest.com)
+
 Information disappears over time. Note taker is a Python script that finds your
 Nostr notes on relays and saves them locally into a file so you can keep them
 forever even if relays delete them.
